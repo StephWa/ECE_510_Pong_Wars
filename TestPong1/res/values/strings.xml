@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TestPong1</string>
+    <string name="action_settings">Settings</string>
+    <string name="game_text">Pong Wars!</string>
+ 	<string name="menu_start_1p">1 player</string>
+ 	<string name="menu_start_2p">2 players</string>
+  	<string name="menu_start_0p">0 players</string>
+ 	<string name="menu_pause">pause</string>
+ 	<string name="menu_resume">resume</string>
+	<string name="menu_sound">sound</string>
+	<string name="menu_info">info</string>
+	
+</resources>
+
