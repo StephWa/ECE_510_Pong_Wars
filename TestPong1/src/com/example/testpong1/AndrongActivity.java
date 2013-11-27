@@ -1,15 +1,18 @@
 package com.example.testpong1;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class AndrongActivity extends Activity
 {
    private AndrongSurfaceView pongSurfaceView;
+   private BluetoothAdapter BtAdapter;
 
    /**
     * Called when the activity is first created.
@@ -64,8 +67,13 @@ public class AndrongActivity extends Activity
          case MENU_START_1P:
             androidPongThread.doStart1p();
             return true;
-         case MENU_START_2P:
-            androidPongThread.doStart2p();
+         case MENU_START_2P:     	 
+             //check to see if device supports Bluetooth
+        	 BtAdapter = BluetoothAdapter.getDefaultAdapter(); 
+             if(BtAdapter == null)
+            	 showToast(getString(R.string.noBtMessage));
+             else 
+            	 androidPongThread.doStart2p();
             return true;
          case MENU_START_0P:
             androidPongThread.doStart0p();
@@ -86,7 +94,19 @@ public class AndrongActivity extends Activity
 
       return false;
    }
-
+   
+   /**
+    * displays toast
+    */
+   public void showToast(final String toast)
+   {
+       runOnUiThread(new Runnable() {
+           public void run()
+           {
+               Toast.makeText(AndrongActivity.this, toast, Toast.LENGTH_SHORT).show();
+           }
+       });
+   }
    /**
     * Invoked when the Activity loses user focus.
     */

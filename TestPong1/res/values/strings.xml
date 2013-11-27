@@ -11,6 +11,7 @@
  	<string name="menu_resume">resume</string>
 	<string name="menu_sound">sound</string>
 	<string name="menu_info">info</string>
+	<string name="noBtMessage">Device does not support Bluetooth</string>
 	
 </resources>
 

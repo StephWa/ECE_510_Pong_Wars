@@ -1,5 +1,6 @@
 package com.example.testpong1;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
