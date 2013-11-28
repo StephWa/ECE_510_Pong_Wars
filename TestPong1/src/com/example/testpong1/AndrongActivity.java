@@ -2,6 +2,7 @@ package com.example.testpong1;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,6 +74,15 @@ public class AndrongActivity extends Activity
              if(BtAdapter == null)
             	 showToast(getString(R.string.noBtMessage));
              else 
+            	 showToast("enabling Bluetooth");
+            	 //enable Bluetooth if not already enabled
+            	 if(!BtAdapter.isEnabled()){
+            		 int REQUEST_ENABLE_BT = 1;		// request code parameter
+            		 // create intent that issues a request to system settings to enable Bluetooth
+            		 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+					 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);           		 
+            	 }
+            	           	 
             	 androidPongThread.doStart2p();
             return true;
          case MENU_START_0P:
