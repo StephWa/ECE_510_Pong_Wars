@@ -1,8 +1,15 @@
 package com.example.testpong1;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +21,7 @@ public class AndrongActivity extends Activity
 {
    private AndrongSurfaceView pongSurfaceView;
    private BluetoothAdapter BtAdapter;
+   private ArrayList<BluetoothDevice> btDeviceList = new ArrayList<BluetoothDevice>();
 
    /**
     * Called when the activity is first created.
@@ -26,8 +34,31 @@ public class AndrongActivity extends Activity
       setContentView(R.layout.main);
       pongSurfaceView = (AndrongSurfaceView) findViewById(R.id.androng);
       pongSurfaceView.setTextView((TextView) findViewById(R.id.text));
+      
+   // Register the BroadcastReceiver
+      IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+      //filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+      //filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+      registerReceiver(mReceiver, filter);
    }
 
+   // Create a BroadcastReceiver for ACTION_FOUND
+   private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+	
+	   @Override
+	   public void onReceive(Context context, Intent intent) {
+		   String action = intent.getAction();
+		   // When discovery finds a device
+		   if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+			   showToast("found device");
+			   // Get the BluetoothDevice object from the Intent
+			   BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+			   // Add the name and address to an array adapter to show in a ListView
+			   btDeviceList.add(device);
+		   }
+	   }
+   };
+   
    private static final int MENU_PAUSE = 4;
    private static final int MENU_RESUME = 5;
    private static final int MENU_START_1P = 6;
@@ -58,7 +89,37 @@ public class AndrongActivity extends Activity
       androidPongThread.pause();
       return true;
    }
-
+   
+   public static final int REQUEST_ENABLE_BT = 1;		// request code parameter
+   
+   private void checkForBluetooth() {
+	   //check to see if device supports Bluetooth
+  	   BtAdapter = BluetoothAdapter.getDefaultAdapter(); 
+  	   
+       if(BtAdapter == null)
+      	 showToast(getString(R.string.noBtMessage));
+       else {
+      	 //enable Bluetooth if not already enabled
+      	 if(!BtAdapter.isEnabled()){
+      		 // create intent that issues a request to system settings to enable Bluetooth
+      		 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);           		 
+      	 }
+       	 Set<BluetoothDevice> pairedDevices = BtAdapter.getBondedDevices();
+       	 // If there are paired devices
+       	 if (pairedDevices.size() > 0) {
+       		 // Loop through paired devices
+       		 for (BluetoothDevice device : pairedDevices) {
+       			 // Add the name and address to an array adapter to show in a ListView
+       			 btDeviceList.add(device);
+       		 }
+       	 }
+    }
+       
+      	 //look for other Bluetooth devices
+      	 BtAdapter.startDiscovery();
+   }
+   
    @Override
    public boolean onOptionsItemSelected(MenuItem item)
    {
@@ -69,21 +130,9 @@ public class AndrongActivity extends Activity
             androidPongThread.doStart1p();
             return true;
          case MENU_START_2P:     	 
-             //check to see if device supports Bluetooth
-        	 BtAdapter = BluetoothAdapter.getDefaultAdapter(); 
-             if(BtAdapter == null)
-            	 showToast(getString(R.string.noBtMessage));
-             else 
-            	 showToast("enabling Bluetooth");
-            	 //enable Bluetooth if not already enabled
-            	 if(!BtAdapter.isEnabled()){
-            		 int REQUEST_ENABLE_BT = 1;		// request code parameter
-            		 // create intent that issues a request to system settings to enable Bluetooth
-            		 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-					 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);           		 
-            	 }
+            checkForBluetooth();
             	           	 
-            	 androidPongThread.doStart2p();
+            androidPongThread.doStart2p();
             return true;
          case MENU_START_0P:
             androidPongThread.doStart0p();
@@ -140,5 +189,6 @@ public class AndrongActivity extends Activity
    {
       super.onDestroy();
       SoundManager.cleanup();
+      unregisterReceiver(mReceiver);
    }
 }
